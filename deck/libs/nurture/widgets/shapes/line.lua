@@ -1,11 +1,11 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
-local Polygon = setmetatable({}, { __index = BaseWidget })
-Polygon.__index = Polygon
+local Line = setmetatable({}, { __index = BaseWidget })
+Line.__index = Line
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Polygon:new(N, options)
-    local self = setmetatable(BaseWidget:new("Polygon"), Polygon)
+function Line:new(N, options)
+    local self = setmetatable(BaseWidget:new("Line"), Line)
     self.nurture = N
 
     options = options or {}
@@ -13,16 +13,15 @@ function Polygon:new(N, options)
     self.x = options.x or 0
     self.y = options.y or 0
 
-    self._widgetCannotHaveChildren = true
-
-
     self.horizAlign = options.horizAlign or nil -- "left", "center", "right"
     self.vertAlign = options.vertAlign or nil -- "top", "center", "bottom"
     self.stackHorizAlign = options.stackHorizAlign or nil -- "left", "center", "right"
     self.stackVertAlign = options.stackVertAlign or nil -- "top", "center", "bottom"
 
-    self.vertices = options.vertices or { 0, 0, 100, 0, 50, 100 }
-    self.mode = options.mode or "fill" -- "fill" or "line"
+    self._widgetCannotHaveChildren = true
+
+    -- Points can be provided as a flat array: {x1, y1, x2, y2, ...}
+    self.points = options.points or { 0, 0, 100, 100 }
     self.lineWidth = options.lineWidth or 1
     
     self.color = options.color or { 1, 1, 1, 1 }
@@ -44,35 +43,32 @@ function Polygon:new(N, options)
     return self
 end
 
-function Polygon:setVertices(vertices)
-    self.vertices = vertices
+function Line:setPoints(points)
+    self.points = points
     self:updateSize()
 end
 
-function Polygon:setMode(mode)
-    self.mode = mode
-end
-
-function Polygon:setLineWidth(lineWidth)
+function Line:setLineWidth(lineWidth)
     self.lineWidth = lineWidth
 end
 
-function Polygon:setColor(r, g, b, a)
+function Line:setColor(r, g, b, a)
     self.color = { r, g, b, a or 1 }
 end
 
-function Polygon:setShader(shader)
+function Line:setShader(shader)
     self.shader = shader
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Polygon:setPosition(x, y)
+function Line:setPosition(x, y)
     local dx = x - self.x
     local dy = y - self.y
     
-    for i = 1, #self.vertices, 2 do
-        self.vertices[i] = self.vertices[i] + dx
-        self.vertices[i + 1] = self.vertices[i + 1] + dy
+    -- Translate all points
+    for i = 1, #self.points, 2 do
+        self.points[i] = self.points[i] + dx
+        self.points[i + 1] = self.points[i + 1] + dy
     end
     
     self.x = x
@@ -81,13 +77,13 @@ function Polygon:setPosition(x, y)
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Polygon:draw()
+function Line:draw()
     if not self.visible or not self.enabled then
         return
     end
 
-    if #self.vertices < 6 then
-        return -- Need at least 3 vertices (6 coordinates) for a polygon
+    if #self.points < 4 then
+        return -- Need at least 2 points (4 coordinates)
     end
 
     love.graphics.push()
@@ -100,12 +96,9 @@ function Polygon:draw()
     local oldLineWidth = love.graphics.getLineWidth()
     
     love.graphics.setColor(self.color)
-    
-    if self.mode == "line" then
-        love.graphics.setLineWidth(self.lineWidth)
-    end
+    love.graphics.setLineWidth(self.lineWidth)
 
-    love.graphics.polygon(self.mode, self.vertices)
+    love.graphics.line(self.points)
 
     love.graphics.setColor(oldColor)
     love.graphics.setLineWidth(oldLineWidth)
@@ -121,8 +114,8 @@ function Polygon:draw()
     love.graphics.pop()
 end
 
-function Polygon:updateSize()
-    if #self.vertices < 2 then
+function Line:updateSize()
+    if #self.points < 2 then
         self.width = 0
         self.height = 0
         self.x = 0
@@ -133,13 +126,13 @@ function Polygon:updateSize()
     local minX, minY = math.huge, math.huge
     local maxX, maxY = -math.huge, -math.huge
 
-    for i = 1, #self.vertices, 2 do
-        local vx = self.vertices[i]
-        local vy = self.vertices[i + 1]
-        minX = math.min(minX, vx)
-        minY = math.min(minY, vy)
-        maxX = math.max(maxX, vx)
-        maxY = math.max(maxY, vy)
+    for i = 1, #self.points, 2 do
+        local px = self.points[i]
+        local py = self.points[i + 1]
+        minX = math.min(minX, px)
+        minY = math.min(minY, py)
+        maxX = math.max(maxX, px)
+        maxY = math.max(maxY, py)
     end
 
     self.x = minX
@@ -148,5 +141,5 @@ function Polygon:updateSize()
     self.height = maxY - minY
 end
 
-return Polygon
+return Line
 

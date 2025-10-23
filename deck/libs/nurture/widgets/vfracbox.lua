@@ -1,4 +1,4 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
 local VFracBox = setmetatable({}, { __index = BaseWidget })
 VFracBox.__index = VFracBox

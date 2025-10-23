@@ -1,4 +1,4 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
 local Progress = setmetatable({}, { __index = BaseWidget })
 Progress.__index = Progress

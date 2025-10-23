@@ -1,21 +1,18 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
-local HFracBox = setmetatable({}, { __index = BaseWidget })
-HFracBox.__index = HFracBox
+local HBox = setmetatable({}, { __index = BaseWidget })
+HBox.__index = HBox
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:new(N, options)
-    local self = setmetatable(BaseWidget:new("HFracBox"), HFracBox)
+function HBox:new(N, options)
+    local self = setmetatable(BaseWidget:new("HBox"), HBox)
     self.nurture = N
-
     self.x = options.x or 0
     self.y = options.y or 0
 
-    options = options or {}
-
     self._widgetCannotHaveChildren = false
     self.spacing = options.spacing or 0
-    self.ratios = options.ratios or nil
+    self.justify = options.justify or "left"
 
     self.forcedWidth = options.forcedWidth
     self.forcedHeight = options.forcedHeight
@@ -49,29 +46,40 @@ function HFracBox:new(N, options)
     return self
 end
 
-function HFracBox:setSpacing(spacing)
+function HBox:setSpacing(spacing)
     self.spacing = spacing
     self:updateSize()
 end
 
-function HFracBox:setRatios(ratios)
-    self.ratios = ratios
+function HBox:setJustify(justify)
+    local validJustify = {
+        left = true,
+        right = true,
+        center = true,
+        ["space-evenly"] = true,
+        ["space-between"] = true
+    }
+    if not validJustify[justify] then
+        error("HBox:setJustify(): Invalid justify: " ..
+            justify .. ". Must be one of: left, right, center, space-evenly, space-between")
+    end
+    self.justify = justify
     self:updateSize()
 end
 
-function HFracBox:setAddChildCallback(callback)
+function HBox:setAddChildCallback(callback)
     self.addChildCallback = callback
 end
 
-function HFracBox:setRemoveChildCallback(callback)
+function HBox:setRemoveChildCallback(callback)
     self.removeChildCallback = callback
 end
 
-function HFracBox:setSizeChangeCallback(callback)
+function HBox:setSizeChangeCallback(callback)
     self.sizeChangeCallback = callback
 end
 
-function HFracBox:addChild(child)
+function HBox:addChild(child)
     self:_addChildRelationship(child)
     self:updateSize()
 
@@ -80,12 +88,10 @@ function HFracBox:addChild(child)
     end
 end
 
-function HFracBox:removeChild(child, deleteChild)
+function HBox:removeChild(child, deleteChild)
     if deleteChild and child.delete then
-        -- Delete handles removing from parent
         child:delete()
     else
-        -- Only remove relationship if not deleting
         self:_removeChildRelationship(child)
     end
     
@@ -96,14 +102,12 @@ function HFracBox:removeChild(child, deleteChild)
     end
 end
 
-function HFracBox:clear(deleteChildren)
+function HBox:clear(deleteChildren)
     local children = self:getChildren()
     for _, child in ipairs(children) do
         if deleteChildren and child.delete then
-            -- Delete handles removing from parent
             child:delete()
         else
-            -- Only remove relationship if not deleting
             self:_removeChildRelationship(child)
         end
     end
@@ -111,14 +115,14 @@ function HFracBox:clear(deleteChildren)
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:setPosition(x, y)
+function HBox:setPosition(x, y)
     self.x = x
     self.y = y
     self:updateSize()
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:update(dt)
+function HBox:update(dt)
     BaseWidget.update(self, dt)
 
     local children = self:getChildren()
@@ -129,80 +133,29 @@ function HFracBox:update(dt)
     end
 end
 
-function HFracBox:setForcedWidth(width)
+function HBox:setForcedWidth(width)
     self.forcedWidth = width
     self:updateSize()
 end
 
-function HFracBox:setForcedHeight(height)
+function HBox:setForcedHeight(height)
     self.forcedHeight = height
     self:updateSize()
 end
 
-function HFracBox:setForcedSize(width, height)
+function HBox:setForcedSize(width, height)
     self.forcedWidth = width
     self.forcedHeight = height
     self:updateSize()
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:onMousePressed(x, y, button)
-    for _, childUUID in ipairs(self.childrenUUIDs) do
-        local child = self.nurture:getFromUUID(childUUID)
-        if child and child.enabled and child.onMousePressed then
-            child:onMousePressed(x, y, button)
-        end
-    end
-end
-
----@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:onMouseReleased(x, y, button)
-    for _, childUUID in ipairs(self.childrenUUIDs) do
-        local child = self.nurture:getFromUUID(childUUID)
-        if child and child.enabled and child.onMouseReleased then
-            child:onMouseReleased(x, y, button)
-        end
-    end
-end
-
----@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:onDrag(x, y, dx, dy)
-    for _, childUUID in ipairs(self.childrenUUIDs) do
-        local child = self.nurture:getFromUUID(childUUID)
-        if child and child.enabled and child.onDrag then
-            child:onDrag(x, y, dx, dy)
-        end
-    end
-end
-
----@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:onDragEnd(x, y, button)
-    for _, childUUID in ipairs(self.childrenUUIDs) do
-        local child = self.nurture:getFromUUID(childUUID)
-        if child and child.enabled and child.onDragEnd then
-            child:onDragEnd(x, y, button)
-        end
-    end
-end
-
----@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:updateMouseState(mx, my)
-    BaseWidget.updateMouseState(self, mx, my)
-
-    for _, childUUID in ipairs(self.childrenUUIDs) do
-        local child = self.nurture:getFromUUID(childUUID)
-        if child and child.enabled and child.updateMouseState then
-            child:updateMouseState(mx, my)
-        end
-    end
-end
-
----@diagnostic disable-next-line: duplicate-set-field
-function HFracBox:draw()
+function HBox:draw()
     if not self.visible or not self.enabled then
         return
     end
 
+    -- Apply scale transformation
     love.graphics.push()
     local centerX = self.x + self.width / 2
     local centerY = self.y + self.height / 2
@@ -222,13 +175,14 @@ function HFracBox:draw()
         self.drawCallback(self)
     end
 
+    -- Pop scale transformation
     love.graphics.pop()
 end
 
-function HFracBox:updateSize()
+function HBox:updateSize()
     local oldWidth = self.width
     local oldHeight = self.height
-
+    
     local children = self:getChildren()
     local numChildren = #children
 
@@ -242,58 +196,50 @@ function HFracBox:updateSize()
         return
     end
 
-    if self.ratios then
-        if #self.ratios ~= numChildren then
-            if #self.ratios < numChildren then
-                for i = #self.ratios + 1, numChildren do
-                    self.ratios[i] = 1
-                end
-            elseif #self.ratios > numChildren then
-                for i = numChildren + 1, #self.ratios do
-                    self.ratios[i] = nil
-                end
-            end
-        end
-    end
-
+    local sumChildrenWidth = 0
     local tallestChildHeight = 0
+
     for _, child in ipairs(children) do
+        sumChildrenWidth = sumChildrenWidth + child.width
         if child.height > tallestChildHeight then
             tallestChildHeight = child.height
         end
     end
 
-    local sumChildrenWidth = 0
-    for _, child in ipairs(children) do
-        sumChildrenWidth = sumChildrenWidth + child.width
-    end
-
     local totalSpacing = self.spacing * (numChildren - 1)
-    local defaultWidth = sumChildrenWidth + totalSpacing
+    local contentWidth = sumChildrenWidth + totalSpacing
 
-    self.width = self.forcedWidth or defaultWidth
+    self.width = math.max(self.forcedWidth or 0, contentWidth)
     self.height = math.max(self.forcedHeight or 0, tallestChildHeight)
+
+    local availableWidth = self.width
+    local availableHeight = self.height
 
     local targetHeight = self.forcedHeight or tallestChildHeight
 
-    local ratios = self.ratios or {}
-    if not self.ratios then
-        for i = 1, numChildren do
-            ratios[i] = 1
-        end
-    end
-
-    local totalRatio = 0
-    for _, ratio in ipairs(ratios) do
-        totalRatio = totalRatio + ratio
-    end
-
-    local availableWidth = self.width - totalSpacing
-
     local childX = self.x
-    for i, child in ipairs(children) do
-        local childWidth = (ratios[i] / totalRatio) * availableWidth
+    local startX = childX
+    local gap = self.spacing
 
+    if self.justify == "right" then
+        local extraSpace = availableWidth - contentWidth
+        startX = self.x + extraSpace
+    elseif self.justify == "center" then
+        local extraSpace = availableWidth - contentWidth
+        startX = self.x + extraSpace / 2
+    elseif self.justify == "space-evenly" then
+        gap = (availableWidth - sumChildrenWidth) / (numChildren + 1)
+        startX = self.x + gap
+    elseif self.justify == "space-between" then
+        if numChildren > 1 then
+            gap = (availableWidth - sumChildrenWidth) / (numChildren - 1)
+        end
+        startX = self.x
+    end
+
+    childX = startX
+
+    for _, child in ipairs(children) do
         local vertAlign = child.vertAlign or "stretch"
 
         if not child._originalForcedHeight and vertAlign ~= "stretch" then
@@ -302,6 +248,7 @@ function HFracBox:updateSize()
 
         local childY = self.y
         local childHeight = child.height
+
         if vertAlign == "stretch" then
             if child.setForcedHeight then
                 child:setForcedHeight(targetHeight)
@@ -318,13 +265,10 @@ function HFracBox:updateSize()
             if vertAlign == "top" then
                 childY = self.y
             elseif vertAlign == "center" then
-                childY = self.y + (self.height - childHeight) / 2
+                childY = self.y + (availableHeight - childHeight) / 2
             elseif vertAlign == "bottom" then
                 childY = self.y + self.height - childHeight
             end
-        end
-        if child.setForcedWidth then
-            child:setForcedWidth(childWidth)
         end
 
         child.x = childX
@@ -334,7 +278,7 @@ function HFracBox:updateSize()
             child:updateSize()
         end
 
-        childX = childX + childWidth + self.spacing
+        childX = childX + child.width + gap
     end
 
     if self.sizeChangeCallback and (oldWidth ~= self.width or oldHeight ~= self.height) then
@@ -342,4 +286,56 @@ function HFracBox:updateSize()
     end
 end
 
-return HFracBox
+---@diagnostic disable-next-line: duplicate-set-field
+function HBox:onMousePressed(x, y, button)
+    for _, childUUID in ipairs(self.childrenUUIDs) do
+        local child = self.nurture:getFromUUID(childUUID)
+        if child and child.enabled and child.onMousePressed then
+            child:onMousePressed(x, y, button)
+        end
+    end
+end
+
+---@diagnostic disable-next-line: duplicate-set-field
+function HBox:onMouseReleased(x, y, button)
+    for _, childUUID in ipairs(self.childrenUUIDs) do
+        local child = self.nurture:getFromUUID(childUUID)
+        if child and child.enabled and child.onMouseReleased then
+            child:onMouseReleased(x, y, button)
+        end
+    end
+end
+
+---@diagnostic disable-next-line: duplicate-set-field
+function HBox:onDrag(x, y, dx, dy)
+    for _, childUUID in ipairs(self.childrenUUIDs) do
+        local child = self.nurture:getFromUUID(childUUID)
+        if child and child.enabled and child.onDrag then
+            child:onDrag(x, y, dx, dy)
+        end
+    end
+end
+
+---@diagnostic disable-next-line: duplicate-set-field
+function HBox:onDragEnd(x, y, button)
+    for _, childUUID in ipairs(self.childrenUUIDs) do
+        local child = self.nurture:getFromUUID(childUUID)
+        if child and child.enabled and child.onDragEnd then
+            child:onDragEnd(x, y, button)
+        end
+    end
+end
+
+---@diagnostic disable-next-line: duplicate-set-field
+function HBox:updateMouseState(mx, my)
+    BaseWidget.updateMouseState(self, mx, my)
+    
+    for _, childUUID in ipairs(self.childrenUUIDs) do
+        local child = self.nurture:getFromUUID(childUUID)
+        if child and child.enabled and child.updateMouseState then
+            child:updateMouseState(mx, my)
+        end
+    end
+end
+
+return HBox

@@ -1,11 +1,11 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
-local Rectangle = setmetatable({}, { __index = BaseWidget })
-Rectangle.__index = Rectangle
+local Circle = setmetatable({}, { __index = BaseWidget })
+Circle.__index = Circle
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Rectangle:new(N, options)
-    local self = setmetatable(BaseWidget:new("Rectangle"), Rectangle)
+function Circle:new(N, options)
+    local self = setmetatable(BaseWidget:new("Circle"), Circle)
     self.nurture = N
 
     options = options or {}
@@ -15,18 +15,17 @@ function Rectangle:new(N, options)
 
     self._widgetCannotHaveChildren = true
 
-    self.width = options.width or 100
-    self.height = options.height or 100
-    
-    self.mode = options.mode or "fill" -- "fill" or "line"
-    self.lineWidth = options.lineWidth or 1
-    self.rx = options.rx or nil -- rounded corners x radius
-    self.ry = options.ry or nil -- rounded corners y radius
-    self.segments = options.segments or nil -- for rounded corners
+
     self.horizAlign = options.horizAlign or nil -- "left", "center", "right"
     self.vertAlign = options.vertAlign or nil -- "top", "center", "bottom"
     self.stackHorizAlign = options.stackHorizAlign or nil -- "left", "center", "right"
     self.stackVertAlign = options.stackVertAlign or nil -- "top", "center", "bottom"
+
+    self.radius = options.radius or 50
+    self.segments = options.segments or nil
+    self.mode = options.mode or "fill" -- "fill" or "line"
+    self.lineWidth = options.lineWidth or 1
+    
     self.color = options.color or { 1, 1, 1, 1 }
     self.shader = options.shader or nil
 
@@ -41,44 +40,44 @@ function Rectangle:new(N, options)
     N:addWidget(self)
     N._widgetsByUUID[self.uuid] = self
 
+    self:updateSize()
+
     return self
 end
 
-function Rectangle:setSize(width, height)
-    self.width = width
-    self.height = height
+function Circle:setRadius(radius)
+    self.radius = radius
+    self:updateSize()
 end
 
-function Rectangle:setMode(mode)
-    self.mode = mode
-end
-
-function Rectangle:setLineWidth(lineWidth)
-    self.lineWidth = lineWidth
-end
-
-function Rectangle:setRounding(rx, ry, segments)
-    self.rx = rx
-    self.ry = ry or rx
+function Circle:setSegments(segments)
     self.segments = segments
 end
 
-function Rectangle:setColor(r, g, b, a)
+function Circle:setMode(mode)
+    self.mode = mode
+end
+
+function Circle:setLineWidth(lineWidth)
+    self.lineWidth = lineWidth
+end
+
+function Circle:setColor(r, g, b, a)
     self.color = { r, g, b, a or 1 }
 end
 
-function Rectangle:setShader(shader)
+function Circle:setShader(shader)
     self.shader = shader
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Rectangle:setPosition(x, y)
+function Circle:setPosition(x, y)
     self.x = x
     self.y = y
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Rectangle:draw()
+function Circle:draw()
     if not self.visible or not self.enabled then
         return
     end
@@ -98,14 +97,10 @@ function Rectangle:draw()
         love.graphics.setLineWidth(self.lineWidth)
     end
 
-    if self.rx and self.ry then
-        if self.segments then
-            love.graphics.rectangle(self.mode, self.x, self.y, self.width, self.height, self.rx, self.ry, self.segments)
-        else
-            love.graphics.rectangle(self.mode, self.x, self.y, self.width, self.height, self.rx, self.ry)
-        end
+    if self.segments then
+        love.graphics.circle(self.mode, self.x, self.y, self.radius, self.segments)
     else
-        love.graphics.rectangle(self.mode, self.x, self.y, self.width, self.height)
+        love.graphics.circle(self.mode, self.x, self.y, self.radius)
     end
 
     love.graphics.setColor(oldColor)
@@ -122,5 +117,10 @@ function Rectangle:draw()
     love.graphics.pop()
 end
 
-return Rectangle
+function Circle:updateSize()
+    self.width = self.radius * 2
+    self.height = self.radius * 2
+end
+
+return Circle
 

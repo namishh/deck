@@ -1,4 +1,4 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
 local Grid = setmetatable({}, { __index = BaseWidget })
 Grid.__index = Grid

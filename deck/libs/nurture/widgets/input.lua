@@ -1,4 +1,4 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 local utf8 = require("utf8")
 
 local Input = setmetatable({}, { __index = BaseWidget })

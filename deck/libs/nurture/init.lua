@@ -342,31 +342,31 @@ function nurture:textinput(text)
     end
 end
 
-nurture.BaseWidget = require("libs.nurture.basewidget")
+nurture.BaseWidget = require((...):match("(.-)[^%.]+$") .. "nurture.basewidget")
 
-nurture.Box = require("libs.nurture.widgets.box")
-nurture.HBox = require("libs.nurture.widgets.hbox")
-nurture.VBox = require("libs.nurture.widgets.vbox")
-nurture.HFracBox = require("libs.nurture.widgets.hfracbox")
-nurture.VFracBox = require("libs.nurture.widgets.vfracbox")
-nurture.Grid = require("libs.nurture.widgets.grid")
-nurture.Stack = require("libs.nurture.widgets.stack")
-nurture.Tabbed = require("libs.nurture.widgets.tabbed")
+nurture.Box = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.box")
+nurture.HBox = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.hbox")
+nurture.VBox = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.vbox")
+nurture.HFracBox = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.hfracbox")
+nurture.VFracBox = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.vfracbox")
+nurture.Grid = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.grid")
+nurture.Stack = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.stack")
+nurture.Tabbed = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.tabbed")
 
-nurture.Image = require("libs.nurture.widgets.image")
-nurture.Video = require("libs.nurture.widgets.video")
-nurture.TextLabel = require("libs.nurture.widgets.text_label")
-nurture.Button = require("libs.nurture.widgets.button")
-nurture.Progress = require("libs.nurture.widgets.progress")
-nurture.Slider = require("libs.nurture.widgets.slider")
-nurture.Input = require("libs.nurture.widgets.input")
+nurture.Image = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.image")
+nurture.Video = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.video")
+nurture.TextLabel = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.text_label")
+nurture.Button = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.button")
+nurture.Progress = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.progress")
+nurture.Slider = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.slider")
+nurture.Input = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.input")
 
 nurture.Shape = {
-    Circle = require("libs.nurture.widgets.shapes.circle"),
-    Rectangle = require("libs.nurture.widgets.shapes.rectangle"),
-    Line = require("libs.nurture.widgets.shapes.line"),
-    Point = require("libs.nurture.widgets.shapes.point"),
-    Polygon = require("libs.nurture.widgets.shapes.polygon")
+    Circle = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.shapes.circle"),
+    Rectangle = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.shapes.rectangle"),
+    Line = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.shapes.line"),
+    Point = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.shapes.point"),
+    Polygon = require((...):match("(.-)[^%.]+$") .. "nurture.widgets.shapes.polygon")
 }
 
 return nurture

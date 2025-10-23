@@ -1,11 +1,11 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
-local Video = setmetatable({}, { __index = BaseWidget })
-Video.__index = Video
+local Image = setmetatable({}, { __index = BaseWidget })
+Image.__index = Image
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Video:new(N, videoPath, options)
-    local self = setmetatable(BaseWidget:new("Video"), Video)
+function Image:new(N, imagePath, options)
+    local self = setmetatable(BaseWidget:new("Image"), Image)
     self.nurture = N
 
     options = options or {}
@@ -15,17 +15,17 @@ function Video:new(N, videoPath, options)
 
     self._widgetCannotHaveChildren = true
 
-    if type(videoPath) == "string" then
-        local info = love.filesystem.getInfo(videoPath)
+    if type(imagePath) == "string" then
+        local info = love.filesystem.getInfo(imagePath)
         if not info or info.type ~= "file" then
-            error("Video:new(): Video file not found: " .. videoPath)
+            error("Image:new(): Image file not found: " .. imagePath)
         end
-        self.video = love.graphics.newVideo(videoPath)
-    elseif type(videoPath) == "userdata" then
-        -- Already a Love2D video object
-        self.video = videoPath
+        self.image = love.graphics.newImage(imagePath)
+    elseif type(imagePath) == "userdata" then
+        -- Already a Love2D image object
+        self.image = imagePath
     else
-        error("Video:new(): videoPath must be a string path or Love2D Video object")
+        error("Image:new(): imagePath must be a string path or Love2D Image object")
     end
 
     self.forcedWidth = options.forcedWidth
@@ -49,10 +49,6 @@ function Video:new(N, videoPath, options)
         self.classname = options.classname
     end
 
-    if options.autoplay then
-        self.video:play()
-    end
-
     N:addWidget(self)
     N._widgetsByUUID[self.uuid] = self
 
@@ -61,99 +57,71 @@ function Video:new(N, videoPath, options)
     return self
 end
 
-function Video:play()
-    if self.video then
-        self.video:play()
-    end
-end
-
-function Video:pause()
-    if self.video then
-        self.video:pause()
-    end
-end
-
-function Video:rewind()
-    if self.video then
-        self.video:rewind()
-    end
-end
-
-function Video:seek(offset)
-    if self.video then
-        self.video:seek(offset)
-    end
-end
-
-function Video:isPlaying()
-    return self.video and self.video:isPlaying()
-end
-
-function Video:setVideo(videoPath)
-    if type(videoPath) == "string" then
-        local info = love.filesystem.getInfo(videoPath)
+function Image:setImage(imagePath)
+    if type(imagePath) == "string" then
+        local info = love.filesystem.getInfo(imagePath)
         if not info or info.type ~= "file" then
-            error("Video:setVideo(): Video file not found: " .. videoPath)
+            error("Image:setImage(): Image file not found: " .. imagePath)
         end
-        self.video = love.graphics.newVideo(videoPath)
-    elseif type(videoPath) == "userdata" then
-        self.video = videoPath
+        self.image = love.graphics.newImage(imagePath)
+    elseif type(imagePath) == "userdata" then
+        self.image = imagePath
     else
-        error("Video:setVideo(): videoPath must be a string path or Love2D Video object")
+        error("Image:setImage(): imagePath must be a string path or Love2D Image object")
     end
     self:updateSize()
 end
 
-function Video:setShader(shader)
+function Image:setShader(shader)
     self.shader = shader
 end
 
-function Video:setColor(r, g, b, a)
+function Image:setColor(r, g, b, a)
     self.color = { r, g, b, a or 1 }
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Video:setScale(scaleX, scaleY)
+function Image:setScale(scaleX, scaleY)
     self.scaleX = scaleX
     self.scaleY = scaleY or scaleX
     self:updateSize()
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Video:setRotation(rotation)
+function Image:setRotation(rotation)
     self.rotation = rotation
 end
 
-function Video:setOrigin(originX, originY)
+function Image:setOrigin(originX, originY)
     self.originX = originX
     self.originY = originY
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Video:setPosition(x, y)
+function Image:setPosition(x, y)
     self.x = x
     self.y = y
 end
 
-function Video:setForcedWidth(width)
+function Image:setForcedWidth(width)
     self.forcedWidth = width
     self:updateSize()
 end
 
-function Video:setForcedHeight(height)
+function Image:setForcedHeight(height)
     self.forcedHeight = height
     self:updateSize()
 end
 
-function Video:setForcedSize(width, height)
+function Image:setForcedSize(width, height)
     self.forcedWidth = width
     self.forcedHeight = height
     self:updateSize()
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
-function Video:draw()
-    if not self.visible or not self.enabled or not self.video then
+function Image:draw()
+    if not self.visible or not self.enabled or not self.image then
         return
     end
 
@@ -166,22 +134,22 @@ function Video:draw()
     local oldColor = { love.graphics.getColor() }
     love.graphics.setColor(self.color)
 
-    local vidWidth = self.video:getWidth()
-    local vidHeight = self.video:getHeight()
+    local imgWidth = self.image:getWidth()
+    local imgHeight = self.image:getHeight()
 
     local drawScaleX = self.scaleX
     local drawScaleY = self.scaleY
 
     if self.forcedWidth then
-        drawScaleX = self.forcedWidth / vidWidth
+        drawScaleX = self.forcedWidth / imgWidth
     end
 
     if self.forcedHeight then
-        drawScaleY = self.forcedHeight / vidHeight
+        drawScaleY = self.forcedHeight / imgHeight
     end
 
     love.graphics.draw(
-        self.video,
+        self.image,
         self.x,
         self.y,
         self.rotation,
@@ -204,29 +172,29 @@ function Video:draw()
     love.graphics.pop()
 end
 
-function Video:updateSize()
-    if not self.video then
+function Image:updateSize()
+    if not self.image then
         self.width = 0
         self.height = 0
         return
     end
 
-    local vidWidth = self.video:getWidth()
-    local vidHeight = self.video:getHeight()
+    local imgWidth = self.image:getWidth()
+    local imgHeight = self.image:getHeight()
 
     if self.forcedWidth and self.forcedHeight then
         self.width = self.forcedWidth
         self.height = self.forcedHeight
     elseif self.forcedWidth then
         self.width = self.forcedWidth
-        self.height = vidHeight * (self.forcedWidth / vidWidth) * self.scaleY
+        self.height = imgHeight * (self.forcedWidth / imgWidth) * self.scaleY
     elseif self.forcedHeight then
         self.height = self.forcedHeight
-        self.width = vidWidth * (self.forcedHeight / vidHeight) * self.scaleX
+        self.width = imgWidth * (self.forcedHeight / imgHeight) * self.scaleX
     else
-        self.width = vidWidth * self.scaleX
-        self.height = vidHeight * self.scaleY
+        self.width = imgWidth * self.scaleX
+        self.height = imgHeight * self.scaleY
     end
 end
 
-return Video
+return Image

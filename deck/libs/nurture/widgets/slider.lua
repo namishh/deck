@@ -1,4 +1,4 @@
-local BaseWidget = require("libs.nurture.basewidget")
+local BaseWidget = require("deck.libs.nurture.basewidget")
 
 local Slider = setmetatable({}, { __index = BaseWidget })
 Slider.__index = Slider
