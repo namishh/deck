@@ -1,9 +1,8 @@
 local nurture = require("deck.libs.nurture")
 
-N = nurture:new()
-
-
+local D = require("deck.deck")
 function love.load()
+    D:load()
     N:registerFont('assets/BoldPixels.ttf', 'TitleFont', 24, true)
     -- adds in a box
     nurture.Box:new(N, {
@@ -22,19 +21,29 @@ function love.load()
 end
 
 function love.draw()
-    -- nurture manages all of its widgets
-    N:draw()
+    D:draw()
 end
 
 function love.update()
-    -- no need to draw and update each one of them seperately
-    N:update()
+    D:update()
 end
 
 function love.mousepressed(x, y, button)
-    N:mousepressed(x, y, button)
+    D:mousepressed(x, y, button)
 end
 
 function love.mousereleased(x, y, button)
-    N:mousereleased(x, y, button)
+    D:mousereleased(x, y, button)
+end
+
+function love.keypressed(key, scancode, isrepeat)
+    D:keypressed(key, scancode, isrepeat)
+end
+
+function love.mousemoved(x, y, dx, dy)
+    D:mousemoved(x, y, dx, dy)
+end
+
+function love.textinput(text)
+    D:textinput(text)
 end
